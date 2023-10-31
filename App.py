@@ -1,7 +1,7 @@
 import customtkinter as CTk
 from ActionDataBase import ActionDataBase
 from TabView import TabView
-from FrameView import FrameView
+from ScrollBarHorizontal import ScrollBar
 
 
 class App(CTk.CTk):
@@ -10,7 +10,7 @@ class App(CTk.CTk):
 
         self.geometry("1200x600")
         self.title("Basic Database Interface")
-        self.resizable(True, False)
+        self.resizable(False, True)
 
         self.myDB = ActionDataBase()
 
@@ -29,14 +29,11 @@ class App(CTk.CTk):
                                                      command=self.clear_checkboxes)
         self.btn_deselect_checkboxes.grid(row=1, column=1)
 
-        self.textbox = CTk.CTkTextbox(master=self, width=800, corner_radius=0)
-        # self.textbox.grid(row=2, column=0, sticky="nsew", pady=40)
-
-        self.frame_view = FrameView(master=self)
-        self.frame_view.grid(row=2, column=0, columnspan=2)
+        self.scrollbar = ScrollBar(master=self, orientation="horizontal")
+        self.scrollbar.grid(row=2, column=0)
 
     def show_buttons(self) -> None:
-        self.frame_view.show_buttons(self.tab_view, self.myDB)
+        self.scrollbar.scrollbar.show_buttons(self.tab_view, self.myDB)
 
     def clear_checkboxes(self) -> None:
         self.tab_view.clear_checkbox()
