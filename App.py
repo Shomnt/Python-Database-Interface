@@ -1,6 +1,7 @@
 import customtkinter as CTk
 from ActionDataBase import ActionDataBase
-from AddOptionMenu import OptionMenu
+from AddOptionMenu import AddOptionMenu
+from DeleteOptionMenu import DeleteOptionMenu
 from TabView import TabView
 from ScrollBarHorizontal import ScrollBar
 
@@ -35,7 +36,8 @@ class App(CTk.CTk):
 
        # self.grid_rowconfigure(0, weight=1)
 
-        self.option_menu = OptionMenu(self, self.myDB)
+        self.option_menu = AddOptionMenu(self, self.myDB)
+        self.delete_option_menu = DeleteOptionMenu(self, self.myDB)
 
     def show_buttons(self) -> None:
         self.scrollbar.scrollbar.show_buttons(self.tab_view, self.myDB)

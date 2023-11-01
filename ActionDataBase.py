@@ -18,19 +18,27 @@ class ActionDataBase:
         self.cursor = self.mydb.cursor()
         self.table_names, self.dependencies = self.get_relations_dict()
 
-    def insert_all(self, table_name: str, values: list) -> None:
-        command = (f"INSERT INTO {table_name} "
-                   f"VALUES ({', '.join(map(str, values))})")
-        self.cursor.execute(command)
-        self.mydb.commit()
-
-    def insert_columns(self, table_name: str, columns: list[str], values: list) -> None:
+    def insert_row(self, table_name: str, columns: list[str], values: list) -> None:
         command = (f"INSERT INTO {table_name} "
                    f"({', '.join(columns)}) "
                    f"VALUES ({', '.join(['%s' for _ in range(len(values))])}) ")
 
         self.cursor.executemany(command, [tuple(values)])
         self.mydb.commit()
+
+    def delete_row(self, table_name: str, primary_keys: list, primary_key_values: list) -> None:
+        command = (f"DELETE FROM {table_name} "
+                   f"{self.delete_subcommand(primary_keys, primary_key_values)}")
+        self.cursor.execute(command)
+        self.mydb.commit()
+
+    def delete_subcommand(self, primary_keys: list, primary_key_values: list) -> str:
+        command = "WHERE "
+        for i, primary_key in enumerate(primary_keys):
+            command += f"{primary_key}={primary_key_values[i]}"
+            if primary_key is not primary_keys[-1]:
+                command += " AND "
+        return command.strip()
 
     def get_tables_name(self) -> list[str]:
         command = f"SHOW TABLES"
@@ -68,6 +76,14 @@ class ActionDataBase:
             types.append(row[1])
         return types
 
+    def get_primary_key(self, table_name: str) -> list[str]:
+        command = f"SHOW KEYS FROM {table_name} WHERE Key_name = 'PRIMARY'"
+        self.cursor.execute(command)
+        keys = []
+        for row in self.cursor.fetchall():
+            keys.append(row[4])
+        return keys
+
     def select_columns(self, tables_list: list[str], columns_list: list[str], orderBy: str = None) -> list[tuple]:
         if not columns_list:
             return []
@@ -98,12 +114,6 @@ class ActionDataBase:
                     relation = eval(self.dependencies[self.table_names.index(table_one)].get(table_two))
                     sub_command += f"{table_one}.{relation[0]} = {table_two}.{relation[1]} AND "
         return sub_command[:len(sub_command)-5]
-
-    def get_relation(self, table_one: str, tables_list: list[str], used: list[str]) -> str:
-        for table in self.dependencies[self.table_names.index(table_one)].keys():
-            if table in tables_list and table not in used:
-                return table
-        return ""
 
     def get_relations_dict(self) -> tuple[list[str], list[dict]]:  # примерно 0 оптимизации, надо поправить
         data = self.get_relations_information()
