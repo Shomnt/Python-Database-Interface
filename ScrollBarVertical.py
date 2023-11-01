@@ -28,8 +28,8 @@ class ScrollBar(CTk.CTkScrollableFrame):
             self.buttons.append(button)
             button.grid(row=0, column=i, sticky="nsew")
 
-        self.configure(width=self.get_width())
-        self.master_scrollbar.change_width()
+        self.configure(width=self.get_width(False))
+        self.master_scrollbar.change_size(self.get_width())
         self.show_data((myDB.select_columns(tab_view.get_active_table(), tab_view.get_checked_items())))
 
     def show_data(self, rows: list[tuple]) -> None:
@@ -50,10 +50,10 @@ class ScrollBar(CTk.CTkScrollableFrame):
             button.destroy()
         self.buttons.clear()
 
-    def get_width(self) -> int:
+    def get_width(self, block: bool = True) -> int:
         width = 0
         for button in self.buttons:
             width += (button.cget("width") + button.cget("border_width"))
-        if width > 1000:
-            return 1000
+        if width > 500 and block:
+            return 500
         return width

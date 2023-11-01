@@ -8,6 +8,6 @@ class ScrollBar(CTk.CTkScrollableFrame):
         self.scrollbar = sc(master=self, orientation="vertical")
         self.scrollbar.grid(row=0, column=0)
 
-    def change_width(self):
-        self.configure(width=self.scrollbar.cget("width"))
+    def change_size(self, width: int) -> None:
+        self.configure(width=width)
         self.configure(height=self.scrollbar.cget("height")+15)

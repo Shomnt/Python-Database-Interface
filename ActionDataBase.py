@@ -18,19 +18,6 @@ class ActionDataBase:
         self.cursor = self.mydb.cursor()
         self.table_names, self.dependencies = self.get_relations_dict()
 
-    def select_all(self, table_name: str, filters: list[str] = None, orderBy: str = None) -> list[tuple]:
-        command = (f"SELECT * "
-                   f"FROM {table_name}")
-
-        if filters is not None:
-            command += f" WHERE {' AND '.join(filters)}"
-
-        if orderBy is not None:
-            command += f" ORDER BY {orderBy}"
-
-        self.cursor.execute(command)
-        return list(self.cursor.fetchall())
-
     def insert_all(self, table_name: str, values: list) -> None:
         command = (f"INSERT INTO {table_name} "
                    f"VALUES ({', '.join(map(str, values))})")
@@ -39,9 +26,10 @@ class ActionDataBase:
 
     def insert_columns(self, table_name: str, columns: list[str], values: list) -> None:
         command = (f"INSERT INTO {table_name} "
-                   f"({', '.join(columns)})"
-                   f"VALUES ({', '.join(map(str, values))})")
-        self.cursor.execute(command)
+                   f"({', '.join(columns)}) "
+                   f"VALUES ({', '.join(['%s' for _ in range(len(values))])}) ")
+
+        self.cursor.executemany(command, [tuple(values)])
         self.mydb.commit()
 
     def get_tables_name(self) -> list[str]:
@@ -60,6 +48,25 @@ class ActionDataBase:
                    f"WHERE REFERENCED_TABLE_SCHEMA='{self.database}'")
         self.cursor.execute(command)
         return self.cursor.fetchall()
+
+    def get_not_null_information(self, table_name: str) -> list[bool]:
+        command = f"DESCRIBE {table_name}"
+        self.cursor.execute(command)
+        can_null = []
+        for row in self.cursor.fetchall():
+            if row[2] == "NO":
+                can_null.append(False)
+            else:
+                can_null.append(True)
+        return can_null
+
+    def get_type_information(self, table_name: str) -> list[str]:
+        command = f"DESCRIBE {table_name}"
+        self.cursor.execute(command)
+        types = []
+        for row in self.cursor.fetchall():
+            types.append(row[1])
+        return types
 
     def select_columns(self, tables_list: list[str], columns_list: list[str], orderBy: str = None) -> list[tuple]:
         if not columns_list:
