@@ -38,6 +38,10 @@ class ScrollBar(CTk.CTkScrollableFrame):
             for j, value in enumerate(row):
                 label = CTk.CTkLabel(master=self, text=value)
                 self.data_labels.append(label)
+                if len(str(value))*9 > self.buttons[j].cget("width"):
+                    self.buttons[j].configure(width=len(value)*9+15)
+                    self.master_scrollbar.change_size(self.get_width())
+                    self.configure(width=self.get_width(False))
                 label.grid(row=(i + 1), column=j)
 
     def clear_labels(self) -> None:
