@@ -4,13 +4,14 @@ from AddOptionMenu import AddOptionMenu
 from DeleteOptionMenu import DeleteOptionMenu
 from TabView import TabView
 from ScrollBarHorizontal import ScrollBar
+from UpdateOptionMenu import UpdateOptionMenu
 
 
 class App(CTk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.geometry("1200x700")
+        self.geometry("1200x750")
         self.title("Basic Database Interface")
         self.resizable(False, True)
 
@@ -38,6 +39,7 @@ class App(CTk.CTk):
 
         self.option_menu = AddOptionMenu(self, self.myDB)
         self.delete_option_menu = DeleteOptionMenu(self, self.myDB)
+        self.update_option_menu = UpdateOptionMenu(self, self.myDB)
 
     def show_buttons(self) -> None:
         self.scrollbar.scrollbar.show_buttons(self.tab_view, self.myDB)

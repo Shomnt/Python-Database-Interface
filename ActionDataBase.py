@@ -26,6 +26,21 @@ class ActionDataBase:
         self.cursor.executemany(command, [tuple(values)])
         self.mydb.commit()
 
+    def update_row(self, table_name: str, columns: list[str], values: list) -> None:
+        not_none_val = []
+        command = f"UPDATE {table_name} SET "
+        for i, column in enumerate(columns):
+            if values[i] is not None:
+                command += f"{column}=%s, "
+                not_none_val.append(values[i])
+        command = command[:-2]
+        command += " WHERE "
+        for key in self.get_primary_key(table_name):
+            command += f"{key}={values[columns.index(key)]} AND "
+        command = command[:-4]
+        self.cursor.executemany(command, [tuple(not_none_val)])
+        self.mydb.commit()
+
     def delete_row(self, table_name: str, primary_keys: list, primary_key_values: list) -> None:
         command = (f"DELETE FROM {table_name} "
                    f"{self.delete_subcommand(primary_keys, primary_key_values)}")
