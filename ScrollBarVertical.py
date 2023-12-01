@@ -30,7 +30,9 @@ class ScrollBar(CTk.CTkScrollableFrame):
 
         self.configure(width=self.get_width(False))
         self.master_scrollbar.change_size(self.get_width())
-        self.show_data((myDB.select_columns(tab_view.get_active_table(), tab_view.get_checked_items())))
+        a = tab_view.get_active_table()
+        b = tab_view.get_checked_items()
+        self.show_data((myDB.select_columns(a, b)))
 
     def show_data(self, rows: list[tuple]) -> None:
         self.clear_labels()
@@ -39,7 +41,7 @@ class ScrollBar(CTk.CTkScrollableFrame):
                 label = CTk.CTkLabel(master=self, text=value)
                 self.data_labels.append(label)
                 if len(str(value))*9 > self.buttons[j].cget("width"):
-                    self.buttons[j].configure(width=len(value)*9+15)
+                    self.buttons[j].configure(width=len(str(value))*9+15)
                     self.master_scrollbar.change_size(self.get_width())
                     self.configure(width=self.get_width(False))
                 label.grid(row=(i + 1), column=j)

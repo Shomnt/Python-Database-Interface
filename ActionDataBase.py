@@ -17,6 +17,7 @@ class ActionDataBase:
         )
         self.cursor = self.mydb.cursor()
         self.table_names, self.dependencies = self.get_relations_dict()
+        self.filter_value = None
 
     def insert_row(self, table_name: str, columns: list[str], values: list) -> None:
         command = (f"INSERT INTO {table_name} "
@@ -104,11 +105,26 @@ class ActionDataBase:
             return []
 
         way = self.get_full_way(tables_list)
+        filter_table, filter_values = self.filter_value.get_table_and_values()
+
         subcommand = ""
         if not way:
             way.append(tables_list[0])
+            if filter_table is not None and filter_table not in way:
+                way.append(filter_table)
         else:
-            subcommand = self.get_sub_command(tables_list)
+            if filter_table is not None and filter_table not in way:
+                way.append(filter_table)
+            subcommand = self.get_sub_command(way)
+
+        if filter_table is not None:
+            if subcommand == "":
+                subcommand = "WHERE "
+            else:
+                subcommand += " AND "
+            for par in filter_values:
+                subcommand += f"{filter_table}.{par[0]} = '{par[1]}' AND "
+            subcommand = subcommand[:-5]
 
         command = (f"SELECT {', '.join(map(str, columns_list))} "
                    f"FROM {', '.join(map(str, way))} "
@@ -117,11 +133,14 @@ class ActionDataBase:
         if orderBy is not None:
             command += f" ORDER BY {orderBy}"
 
-        self.cursor.execute(command)
-        return self.cursor.fetchall()
+        if filter_table is not None:
+            self.cursor.execute(command)
+            return self.cursor.fetchall()
+        else:
+            self.cursor.execute(command)
+            return self.cursor.fetchall()
 
-    def get_sub_command(self, tables_list: list[str]) -> str:
-        way = self.get_full_way(tables_list)
+    def get_sub_command(self, way: list) -> str:
         sub_command = "WHERE "
         for i, table_one in enumerate(way):
             for table_two in way[(i+1):]:
