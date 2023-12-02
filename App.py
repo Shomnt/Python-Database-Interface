@@ -3,6 +3,8 @@ from ActionDataBase import ActionDataBase
 from AddOptionMenu import AddOptionMenu
 from DeleteOptionMenu import DeleteOptionMenu
 from FilterByValueOptionMenu import FilterByValueOptionMenu
+from FuncOptionMenu import FuncOptionMenu
+from ProcOptionMenu import ProcOptionMenu
 from TabView import TabView
 from ScrollBarHorizontal import ScrollBar
 from UpdateOptionMenu import UpdateOptionMenu
@@ -12,9 +14,9 @@ class App(CTk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.geometry("1200x750")
+        self.geometry("1500x750")
         self.title("Basic Database Interface")
-        self.resizable(False, True)
+        self.resizable(True, True)
 
         self.myDB = ActionDataBase()
 
@@ -41,6 +43,8 @@ class App(CTk.CTk):
         self.update_option_menu = UpdateOptionMenu(self, self.myDB)
         self.filter_option_menu = FilterByValueOptionMenu(self, self.myDB)
         self.myDB.filter_value = self.filter_option_menu
+        self.func_optionmenu = FuncOptionMenu(self, self.myDB)
+        self.proc_optionmenu = ProcOptionMenu(self, self.myDB)
 
     def show_buttons(self) -> None:
         self.scrollbar.scrollbar.show_buttons(self.tab_view, self.myDB)

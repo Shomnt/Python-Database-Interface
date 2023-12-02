@@ -100,6 +100,61 @@ class ActionDataBase:
             keys.append(row[4])
         return keys
 
+    def get_func_names(self) -> list[str]:
+        command = (f"SELECT ROUTINE_NAME "
+                   f"FROM information_schema.routines "
+                   f"WHERE ROUTINE_SCHEMA = '{self.database}' AND ROUTINE_TYPE = 'FUNCTION'")
+        self.cursor.execute(command)
+        names = []
+        for row in self.cursor.fetchall():
+            names.append(row[0])
+        return names
+
+    def get_proc_names(self) -> list[str]:
+        command = (f"SELECT ROUTINE_NAME "
+                   f"FROM information_schema.routines "
+                   f"WHERE ROUTINE_SCHEMA = '{self.database}' AND ROUTINE_TYPE = 'PROCEDURE'")
+        self.cursor.execute(command)
+        names = []
+        for row in self.cursor.fetchall():
+            names.append(row[0])
+        return names
+
+    def get_input_information(self, name: str) -> list[str]:
+        command = (f"SELECT PARAMETER_NAME "
+                   f"FROM INFORMATION_SCHEMA.PARAMETERS "
+                   f"WHERE SPECIFIC_SCHEMA = '{self.database}' AND SPECIFIC_NAME = '{name}' AND PARAMETER_MODE = 'IN'")
+        self.cursor.execute(command)
+        parametrs = []
+        for row in self.cursor.fetchall():
+            parametrs.append(row[0])
+        return parametrs
+
+    def get_count_out(self, name: str) -> int:
+        command = (f"SELECT PARAMETER_NAME "
+                   f"FROM INFORMATION_SCHEMA.PARAMETERS "
+                   f"WHERE SPECIFIC_SCHEMA = '{self.database}' AND SPECIFIC_NAME = '{name}' AND PARAMETER_MODE = 'OUT'")
+        self.cursor.execute(command)
+        parametrs = []
+        for row in self.cursor.fetchall():
+            parametrs.append(row[0])
+        return len(parametrs)
+
+    def activate_procedure(self, proc_name: str, input_values: list) -> list:
+        time = tuple(input_values)
+        for _ in range(self.get_count_out(proc_name)):
+            time = time + tuple([0])
+        result = self.cursor.callproc(proc_name, time)
+        print(list(result)[len(input_values):])
+        return list(result)[len(input_values):]
+
+    def activate_function(self, func_name: str, input_values: list) -> list:
+        command = f"SELECT {self.database}.{func_name}({', '.join(['%s' for _ in range(len(input_values))])})"
+        self.cursor.execute(command, tuple(input_values))
+        answer = self.cursor.fetchall()
+        print(answer)
+        return list(answer)
+
     def select_columns(self, tables_list: list[str], columns_list: list[str], orderBy: str = None) -> list[tuple]:
         if not columns_list:
             return []

@@ -12,7 +12,7 @@ class FilterByValueOptionMenu:
                                             command=self.show_names)
         self.optionmenu.grid(row=4, column=0, columnspan=1)
 
-        self.scrollbar_frame = CTk.CTkScrollableFrame(master=master, width=300)
+        self.scrollbar_frame = CTk.CTkScrollableFrame(master=master, width=300, height=200)
         self.scrollbar_frame.grid(row=4, column=1, columnspan=2)
 
         self.labels = []
