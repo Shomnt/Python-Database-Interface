@@ -5,9 +5,9 @@ from mysql.connector import connect
 
 class ActionDataBase:
     def __init__(self):
-        user = "root"
-        password = "20034567iI"
-        self.database = "доставка"
+        user = "Your login"
+        password = "Your password"
+        self.database = "Your database name"
 
         self.mydb = connect(
             host="localhost",
